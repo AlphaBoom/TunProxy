@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 //import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import tun.utils.ProgressTask;
@@ -58,7 +61,9 @@ public class SettingsActivity extends AppCompatActivity {
             return filterType;
         }
 
-    };
+    }
+
+    ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,18 +71,18 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         if (savedInstanceState == null) {
             getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.activity_settings, new SettingsFragment(), "preference_root")
-                .commit();
+                    .beginTransaction()
+                    .replace(R.id.activity_settings, new SettingsFragment(), "preference_root")
+                    .commit();
         } else {
             setTitle(savedInstanceState.getCharSequence(TITLE_TAG));
         }
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                setTitle(R.string.title_activity_settings);
-            }
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    setTitle(R.string.title_activity_settings);
+                }
             }
         });
         ActionBar actionBar = getSupportActionBar();
@@ -125,19 +130,19 @@ public class SettingsActivity extends AppCompatActivity {
             prefPackage.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object value) {
-                if (preference instanceof ListPreference) {
-                    final ListPreference listPreference = (ListPreference) preference;
-                    int index = listPreference.findIndexOfValue((String) value);
-                    prefDisallow.setEnabled(index == MyApplication.VPNMode.DISALLOW.ordinal());
-                    prefAllow.setEnabled(index == MyApplication.VPNMode.ALLOW.ordinal());
+                    if (preference instanceof ListPreference) {
+                        final ListPreference listPreference = (ListPreference) preference;
+                        int index = listPreference.findIndexOfValue((String) value);
+                        prefDisallow.setEnabled(index == MyApplication.VPNMode.DISALLOW.ordinal());
+                        prefAllow.setEnabled(index == MyApplication.VPNMode.ALLOW.ordinal());
 
-                    // Set the summary to reflect the new value.
-                    preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
+                        // Set the summary to reflect the new value.
+                        preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
 
-                    MyApplication.VPNMode mode =  MyApplication.VPNMode.values()[index];
-                    MyApplication.getInstance().storeVPNMode(mode);
-                }
-                return true;
+                        MyApplication.VPNMode mode = MyApplication.VPNMode.values()[index];
+                        MyApplication.getInstance().storeVPNMode(mode);
+                    }
+                    return true;
                 }
             });
             prefPackage.setSummary(prefPackage.getEntry());
@@ -171,19 +176,19 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
                 case VPN_CLEAR_ALL_SELECTION:
                     new AlertDialog.Builder(getActivity())
-                        .setTitle(getString(R.string.title_activity_settings))
-                        .setMessage(getString(R.string.pref_dialog_clear_all_application_msg))
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Set<String> set = new HashSet<>();
-                                MyApplication.getInstance().storeVPNApplication(MyApplication.VPNMode.ALLOW, set);
-                                MyApplication.getInstance().storeVPNApplication(MyApplication.VPNMode.DISALLOW, set);
-                                updateMenuItem();
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+                            .setTitle(getString(R.string.title_activity_settings))
+                            .setMessage(getString(R.string.pref_dialog_clear_all_application_msg))
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Set<String> set = new HashSet<>();
+                                    MyApplication.getInstance().storeVPNApplication(MyApplication.VPNMode.ALLOW, set);
+                                    MyApplication.getInstance().storeVPNApplication(MyApplication.VPNMode.DISALLOW, set);
+                                    updateMenuItem();
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
                     break;
             }
             return false;
@@ -199,7 +204,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class AllowedPackageListFragment extends PackageListFragment  {
+    public static class AllowedPackageListFragment extends PackageListFragment {
         public AllowedPackageListFragment() {
             super(MyApplication.VPNMode.ALLOW);
         }
@@ -233,7 +238,7 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setHasOptionsMenu(true);
-            mFilterPreferenceScreen = getPreferenceManager().createPreferenceScreen(getActivity());
+            mFilterPreferenceScreen = getPreferenceManager().createPreferenceScreen(requireActivity());
             setPreferenceScreen(mFilterPreferenceScreen);
         }
 
@@ -318,8 +323,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             if (task != null && task.getStatus() == ProgressTask.Status.PENDING) {
                 task.execute();
-            }
-            else {
+            } else {
                 task = new AsyncTaskProgress(this);
                 task.execute();
             }
@@ -420,18 +424,15 @@ public class SettingsActivity extends AppCompatActivity {
 //        }
 
         private Preference buildPackagePreferences(final PackageManager pm, final PackageInfo pi) {
-            final CheckBoxPreference prefCheck = new CheckBoxPreference(getActivity());
+            final CheckBoxPreference prefCheck = new CheckBoxPreference(requireActivity());
             prefCheck.setIcon(pi.applicationInfo.loadIcon(pm));
             prefCheck.setTitle(pi.applicationInfo.loadLabel(pm).toString());
             prefCheck.setSummary(pi.packageName);
-            boolean checked = this.mAllPackageInfoMap.containsKey(pi.packageName) ? this.mAllPackageInfoMap.get(pi.packageName) : false;
+            boolean checked = this.mAllPackageInfoMap.containsKey(pi.packageName) && Boolean.TRUE.equals(this.mAllPackageInfoMap.get(pi.packageName));
             prefCheck.setChecked(checked);
-            Preference.OnPreferenceClickListener click = new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                mAllPackageInfoMap.put(prefCheck.getSummary().toString(), prefCheck.isChecked());
+            Preference.OnPreferenceClickListener click = preference -> {
+                mAllPackageInfoMap.put(Objects.requireNonNull(prefCheck.getSummary()).toString(), prefCheck.isChecked());
                 return false;
-                }
             };
             prefCheck.setOnPreferenceClickListener(click);
             return prefCheck;
@@ -491,46 +492,35 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
-            switch (id) {
-                case android.R.id.home:
-                    startActivity(new Intent(getActivity(), SettingsActivity.class));
-                    return true;
-                case R.id.menu_filter_app_system:
-                    item.setChecked(!item.isChecked());
-                    if (item.isChecked()) {
-                        this.filterAppType.add(FilterAppType.SYSTEM_APP);
-                    }
-                    else {
-                        this.filterAppType.remove(FilterAppType.SYSTEM_APP);
-                    }
-                    filter(null, appFilterBy, MyApplication.AppOrderBy.ASC, appSortBy, this.filterAppType);
-                    break;
-                case R.id.menu_sort_order_asc:
-                    item.setChecked(!item.isChecked());
-                    filter(null, appFilterBy, MyApplication.AppOrderBy.ASC, appSortBy, this.filterAppType);
-                    break;
-                case R.id.menu_sort_order_desc:
-                    item.setChecked(!item.isChecked());
-                    filter(null, appFilterBy, MyApplication.AppOrderBy.DESC, appSortBy, this.filterAppType);
-                    break;
-                case R.id.menu_filter_app_name:
-                    item.setChecked(!item.isChecked());
-                    this.appFilterBy = MyApplication.AppSortBy.APPNAME;
-                    //filter(null, MyApplication.AppSortBy.APPNAME, appOrderBy, appSortBy);
-                    break;
-                case R.id.menu_filter_pkg_name:
-                    item.setChecked(!item.isChecked());
-                    this.appFilterBy = MyApplication.AppSortBy.PKGNAME;
-                    //filter(null, MyApplication.AppSortBy.PKGNAME, appOrderBy, appSortBy);
-                    break;
-                case R.id.menu_sort_app_name:
-                    item.setChecked(!item.isChecked());
-                    filter(null, appFilterBy, appOrderBy, MyApplication.AppSortBy.APPNAME, this.filterAppType);
-                    break;
-                case R.id.menu_sort_pkg_name:
-                    item.setChecked(!item.isChecked());
-                    filter(null, appFilterBy, appOrderBy, MyApplication.AppSortBy.PKGNAME, this.filterAppType);
-                    break;
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            } else if (id == R.id.menu_filter_app_system) {
+                item.setChecked(!item.isChecked());
+                if (item.isChecked()) {
+                    this.filterAppType.add(FilterAppType.SYSTEM_APP);
+                } else {
+                    this.filterAppType.remove(FilterAppType.SYSTEM_APP);
+                }
+                filter(null, appFilterBy, MyApplication.AppOrderBy.ASC, appSortBy, this.filterAppType);
+            } else if (id == R.id.menu_sort_order_asc) {
+                item.setChecked(!item.isChecked());
+                filter(null, appFilterBy, MyApplication.AppOrderBy.ASC, appSortBy, this.filterAppType);
+            } else if (id == R.id.menu_sort_order_desc) {
+                item.setChecked(!item.isChecked());
+                filter(null, appFilterBy, MyApplication.AppOrderBy.DESC, appSortBy, this.filterAppType);
+            } else if (id == R.id.menu_filter_app_name) {
+                item.setChecked(!item.isChecked());
+                this.appFilterBy = MyApplication.AppSortBy.APPNAME;
+            } else if (id == R.id.menu_filter_pkg_name) {
+                item.setChecked(!item.isChecked());
+                this.appFilterBy = MyApplication.AppSortBy.PKGNAME;
+            } else if (id == R.id.menu_sort_app_name) {
+                item.setChecked(!item.isChecked());
+                filter(null, appFilterBy, appOrderBy, MyApplication.AppSortBy.APPNAME, this.filterAppType);
+            } else if (id == R.id.menu_sort_pkg_name) {
+                item.setChecked(!item.isChecked());
+                filter(null, appFilterBy, appOrderBy, MyApplication.AppSortBy.PKGNAME, this.filterAppType);
             }
             return super.onOptionsItemSelected(item);
         }
@@ -540,11 +530,10 @@ public class SettingsActivity extends AppCompatActivity {
             this.searchView.clearFocus();
             if (!query.trim().isEmpty()) {
                 filter(query);
-                return true;
             } else {
                 filter("");
-                return true;
             }
+            return true;
         }
 
         @Override
@@ -562,10 +551,10 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     /*
-    * AsyncTask
-    * https://developer.android.com/reference/android/os/AsyncTask
-    * Deprecated in API level R
-    * */
+     * AsyncTask
+     * https://developer.android.com/reference/android/os/AsyncTask
+     * Deprecated in API level R
+     * */
     public static class AsyncTaskProgress extends ProgressTask<String, String, List<PackageInfo>> {
 
         final PackageListFragment packageFragment;
@@ -675,7 +664,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     protected static class ProgressPreference extends Preference {
-        public ProgressPreference(Context context){
+        public ProgressPreference(Context context) {
             super(context);
             setLayoutResource(R.layout.preference_progress);
         }

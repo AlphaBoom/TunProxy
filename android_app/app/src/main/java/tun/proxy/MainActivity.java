@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements
         loadHostPort();
 
     }
+
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
         final Bundle args = pref.getExtras();
@@ -79,9 +80,9 @@ public class MainActivity extends AppCompatActivity implements
         fragment.setArguments(args);
         fragment.setTargetFragment(caller, 0);
         getSupportFragmentManager().beginTransaction()
-            .replace(R.id.activity_settings, fragment)
-            .addToBackStack(null)
-            .commit();
+                .replace(R.id.activity_settings, fragment)
+                .addToBackStack(null)
+                .commit();
         setTitle(pref.getTitle());
         return true;
     }
@@ -105,19 +106,15 @@ public class MainActivity extends AppCompatActivity implements
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_activity_settings:
-                Intent intent = new android.content.Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.action_show_about:
-                new AlertDialog.Builder(this)
+        int id = item.getItemId();
+        if (id == R.id.action_activity_settings) {
+            Intent intent = new android.content.Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.action_show_about) {
+            new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.app_name) + getVersionName())
                     .setMessage(R.string.app_name)
                     .show();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
         }
         return true;
     }
@@ -166,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements
     Runnable statusRunnable = new Runnable() {
         @Override
         public void run() {
-        updateStatus();
-        statusHandler.post(statusRunnable);
+            updateStatus();
+            statusHandler.post(statusRunnable);
         }
     };
 

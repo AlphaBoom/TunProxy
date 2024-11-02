@@ -1,16 +1,17 @@
-apply plugin: 'com.android.application'
+plugins {
+    id('com.android.application')
+}
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "31.0.0"
-
-    sourceCompatibility = '1.8' // -source
-    targetCompatibility = '1.8' // -target
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    namespace "tun.proxy"
 
     defaultConfig {
         applicationId "tun.proxy"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 35
+        compileSdk 34
         versionCode 100270
         versionName VERSION_NAME
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -52,9 +53,9 @@ android {
 
     ndkVersion = '22.1.7171670'
 
-    applicationVariants.all { variant ->
-        if (variant.buildType.name.equals("release")) {
-            variant.outputs.all {
+    applicationVariants.configureEach { variant ->
+        if (variant.buildType.name == "release") {
+            variant.outputs.configureEach {
                 if (outputFileName != null && outputFileName.endsWith('.apk')) {
                     def versionName = defaultConfig.versionName
                     outputFileName = "${APP_NAME}_v${versionName}.apk"
@@ -66,19 +67,17 @@ android {
 }
 
 dependencies {
+    def nav_version = "2.8.3"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.preference:preference:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.0'
-    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.navigation:navigation-fragment:2.0.0'
-    implementation 'androidx.navigation:navigation-ui:2.0.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation "androidx.navigation:navigation-fragment:${nav_version}"
+    implementation "androidx.navigation:navigation-ui:${nav_version}"
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
